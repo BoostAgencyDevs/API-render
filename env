@@ -1,0 +1,15 @@
+# Variables de entorno para Render - Boost Agency API
+# Render detecta automáticamente este archivo .env
+
+# Variables OBLIGATORIAS
+NODE_ENV=production
+PORT=10000
+JWT_SECRET=boost-agency-super-secret-key-2024
+
+# Variables opcionales
+CORS_ORIGIN=*
+UPLOAD_DIR=uploads
+MAX_FILE_SIZE=10485760
+HELMET_ENABLED=true
+RATE_LIMIT_ENABLED=true
+LOG_LEVEL=info
