@@ -121,15 +121,47 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 /**
  * CONFIGURACIÓN PARA PRODUCCIÓN
  * 
- * Sirve la aplicación Angular compilada y maneja el enrutamiento del frontend
+ * Solo API - No sirve frontend
  */
 
-// Servir archivos estáticos de la aplicación Angular compilada
-app.use(express.static(path.join(__dirname, '../frontend/dist/frontend')));
+// Ruta de bienvenida para la API
+app.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: '🚀 Boost Agency API está funcionando correctamente',
+        version: '1.0.0',
+        endpoints: {
+            auth: '/api/auth',
+            contenido: '/api/contenido',
+            servicios: '/api/servicios',
+            blog: '/api/blog',
+            planes: '/api/planes',
+            leads: '/api/leads',
+            tienda: '/api/tienda',
+            upload: '/api/upload'
+        },
+        documentation: 'https://github.com/BoostAgencyDevs/API-render'
+    });
+});
 
-// Ruta catch-all para el enrutamiento del frontend (SPA)
+// Ruta catch-all para APIs no encontradas
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/frontend/index.html'));
+    res.status(404).json({
+        success: false,
+        error: 'Endpoint no encontrado',
+        message: 'Consulta la documentación de la API',
+        availableEndpoints: [
+            'GET /',
+            'POST /api/auth/login',
+            'GET /api/contenido',
+            'GET /api/servicios',
+            'GET /api/blog/episodios',
+            'GET /api/planes',
+            'GET /api/leads',
+            'GET /api/tienda/productos',
+            'POST /api/upload'
+        ]
+    });
 });
 
 /**
