@@ -1,0 +1,105 @@
+/**
+ * @fileoverview Contenido dinámico del sitio web Boost Agency
+ * 
+ * Este archivo contiene todo el contenido dinámico del sitio web,
+ * incluyendo textos, imágenes y configuraciones que pueden ser
+ * modificados sin necesidad de recompilar la aplicación.
+ * 
+ * @author Boost Agency Development Team
+ * @version 1.0.0
+ */
+
+{
+  "inicio": {
+    "hero": {
+      "titulo": "BOOST AGENCY",
+      "subtitulo": "Impulsamos tu marca hacia el éxito digital",
+      "descripcion": "Somos una agencia de marketing digital especializada en crear estrategias innovadoras que transforman tu presencia online y generan resultados reales.",
+      "cta_texto": "Comenzar Ahora",
+      "cta_link": "/el-futuro-es-ahora",
+      "imagen": "/uploads/hero-boost.jpg"
+    },
+    "servicios_destacados": [
+      {
+        "titulo": "Marketing Digital",
+        "descripcion": "Estrategias integrales para maximizar tu presencia online",
+        "icono": "fas fa-chart-line",
+        "link": "/servicios"
+      },
+      {
+        "titulo": "Desarrollo Web",
+        "descripcion": "Sitios web modernos y optimizados para conversión",
+        "icono": "fas fa-code",
+        "link": "/servicios"
+      },
+      {
+        "titulo": "Branding",
+        "descripcion": "Construimos identidades de marca memorables y efectivas",
+        "icono": "fas fa-palette",
+        "link": "/servicios"
+      }
+    ],
+    "estadisticas": {
+      "clientes_satisfechos": "500+",
+      "proyectos_completados": "1200+",
+      "años_experiencia": "8+",
+      "equipo_profesional": "25+"
+    }
+  },
+  "nosotros": {
+    "titulo": "Sobre BOOST AGENCY",
+    "descripcion": "Somos un equipo apasionado de profesionales del marketing digital con más de 8 años de experiencia transformando negocios a través de estrategias innovadoras.",
+    "mision": "Impulsar el crecimiento de nuestros clientes mediante soluciones digitales creativas y efectivas.",
+    "vision": "Ser la agencia de marketing digital líder en Latinoamérica, reconocida por nuestra excelencia e innovación.",
+    "valores": [
+      "Innovación constante",
+      "Resultados medibles",
+      "Transparencia total",
+      "Compromiso con el cliente"
+    ],
+    "equipo": [
+      {
+        "nombre": "Ana García",
+        "cargo": "CEO & Founder",
+        "imagen": "/uploads/team-ana.jpg",
+        "linkedin": "#"
+      },
+      {
+        "nombre": "Carlos Mendez",
+        "cargo": "Director Creativo",
+        "imagen": "/uploads/team-carlos.jpg",
+        "linkedin": "#"
+      },
+      {
+        "nombre": "Sofia Rodriguez",
+        "cargo": "Head of Strategy",
+        "imagen": "/uploads/team-sofia.jpg",
+        "linkedin": "#"
+      }
+    ]
+  },
+  "contacto": {
+    "titulo": "Contactanos",
+    "descripcion": "¿Listo para impulsar tu negocio? Conversemos sobre tu proyecto.",
+    "telefono": "+1 (555) 123-4567",
+    "email": "hola@boostagency.com",
+    "direccion": "123 Business Ave, Suite 100, Ciudad",
+    "horarios": "Lunes a Viernes: 9:00 AM - 6:00 PM",
+    "redes_sociales": {
+      "facebook": "https://facebook.com/boostagency",
+      "instagram": "https://instagram.com/boostagency",
+      "linkedin": "https://linkedin.com/company/boostagency",
+      "twitter": "https://twitter.com/boostagency"
+    }
+  },
+  "footer": {
+    "descripcion": "BOOST AGENCY - Impulsamos tu éxito digital",
+    "enlaces_rapidos": [
+      { "texto": "Inicio", "link": "/inicio" },
+      { "texto": "Servicios", "link": "/servicios" },
+      { "texto": "Planes", "link": "/planes" },
+      { "texto": "Contacto", "link": "/contacto" }
+    ],
+    "copyright": "© 2024 BOOST AGENCY. Todos los derechos reservados."
+  }
+}

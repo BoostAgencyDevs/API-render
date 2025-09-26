@@ -1,0 +1,95 @@
+{
+  "planes": [
+    {
+      "id": "starter",
+      "nombre": "Starter",
+      "precio": "999",
+      "periodo": "mes",
+      "descripcion": "Ideal para pequeñas empresas que inician su presencia digital",
+      "caracteristicas": [
+        "Gestión de 3 redes sociales",
+        "12 posts mensuales",
+        "Diseño básico de posts",
+        "Reporte mensual de métricas",
+        "Soporte por email"
+      ],
+      "destacado": false,
+      "cta_texto": "Comenzar Ahora",
+      "notas": "* Compromiso mínimo de 3 meses"
+    },
+    {
+      "id": "professional",
+      "nombre": "Professional",
+      "precio": "2499",
+      "periodo": "mes",
+      "descripcion": "Perfecto para empresas en crecimiento que buscan maximizar su presencia digital",
+      "caracteristicas": [
+        "Gestión de 5 redes sociales",
+        "24 posts mensuales",
+        "Diseño premium de posts",
+        "Estrategia de contenidos",
+        "Campañas de ads básicas",
+        "Reportes semanales",
+        "Soporte prioritario"
+      ],
+      "destacado": true,
+      "cta_texto": "Elegir Professional",
+      "notas": "* Incluye setup inicial gratuito"
+    },
+    {
+      "id": "enterprise",
+      "nombre": "Enterprise",
+      "precio": "4999",
+      "periodo": "mes",
+      "descripcion": "Solución completa para grandes empresas con necesidades específicas",
+      "caracteristicas": [
+        "Gestión de todas las redes sociales",
+        "Posts ilimitados",
+        "Diseño personalizado",
+        "Estrategia integral",
+        "Campañas de ads avanzadas",
+        "Reportes personalizados",
+        "Gerente de cuenta dedicado",
+        "Soporte 24/7"
+      ],
+      "destacado": false,
+      "cta_texto": "Contactar Ventas",
+      "notas": "* Precio base, personalizable según necesidades"
+    }
+  ],
+  "beneficios_generales": [
+    {
+      "titulo": "Sin contratos largos",
+      "descripcion": "Flexibilidad para adaptar o cancelar tu plan mensualmente",
+      "icono": "fas fa-handshake"
+    },
+    {
+      "titulo": "Soporte garantizado",
+      "descripcion": "Equipo dedicado para resolver tus dudas y necesidades",
+      "icono": "fas fa-headset"
+    },
+    {
+      "titulo": "Resultados medibles",
+      "descripcion": "Reportes detallados del desempeño de tu inversión",
+      "icono": "fas fa-chart-line"
+    }
+  ],
+  "preguntas_frecuentes": [
+    {
+      "pregunta": "¿Puedo cambiar de plan en cualquier momento?",
+      "respuesta": "Sí, puedes actualizar o cambiar tu plan al inicio de cada ciclo de facturación."
+    },
+    {
+      "pregunta": "¿Qué métodos de pago aceptan?",
+      "respuesta": "Aceptamos todas las tarjetas de crédito principales, transferencias bancarias y PayPal."
+    },
+    {
+      "pregunta": "¿Hay algún costo de configuración inicial?",
+      "respuesta": "No hay costos de setup para los planes Professional y Enterprise. El plan Starter tiene un costo único de configuración de $299."
+    },
+    {
+      "pregunta": "¿Ofrecen descuentos por pago anual?",
+      "respuesta": "Sí, obtienes 2 meses gratis al elegir facturación anual en cualquiera de nuestros planes."
+    }
+  ]
+}

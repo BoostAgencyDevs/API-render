@@ -1,0 +1,40 @@
+{
+  "tickets_soporte": [
+    {
+      "id": "ticket-001",
+      "fecha": "2024-01-16T14:20:00Z",
+      "lead_id": "lead-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@email.com",
+      "tipo_consulta": "Información adicional",
+      "prioridad": "media",
+      "asunto": "Consulta sobre servicios de SEO",
+      "mensaje": "Me gustaría obtener más información sobre los servicios de SEO que ofrecen y los tiempos de implementación.",
+      "estado": "abierto",
+      "asignado_a": "equipo-ventas"
+    }
+  ],
+  "configuracion": {
+    "tipos_consulta": [
+      "Información adicional",
+      "Soporte técnico",
+      "Facturación",
+      "Cambio de plan",
+      "Cancelación",
+      "Otro"
+    ],
+    "prioridades": [
+      "baja",
+      "media",
+      "alta",
+      "urgente"
+    ],
+    "estados": [
+      "abierto",
+      "en_proceso",
+      "pendiente_cliente",
+      "resuelto",
+      "cerrado"
+    ]
+  }
+}

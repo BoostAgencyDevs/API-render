@@ -1,0 +1,84 @@
+{
+  "servicios": [
+    {
+      "id": "marketing-digital",
+      "titulo": "Marketing Digital",
+      "descripcion": "Estrategias integrales de marketing digital para maximizar tu presencia online y generar resultados medibles.",
+      "imagen": "/uploads/marketing-digital.jpg",
+      "caracteristicas": [
+        "SEO y posicionamiento web",
+        "Marketing de contenidos",
+        "Email marketing",
+        "Publicidad en redes sociales",
+        "Google Ads",
+        "Analítica y reportes"
+      ],
+      "beneficios": [
+        "Mayor visibilidad online",
+        "Incremento en leads cualificados",
+        "Mejor ROI en campañas",
+        "Engagement con tu audiencia"
+      ]
+    },
+    {
+      "id": "desarrollo-web",
+      "titulo": "Desarrollo Web",
+      "descripcion": "Creación de sitios web modernos, responsivos y optimizados para conversión.",
+      "imagen": "/uploads/desarrollo-web.jpg",
+      "caracteristicas": [
+        "Diseño UX/UI personalizado",
+        "Desarrollo frontend y backend",
+        "E-commerce",
+        "Landing pages",
+        "Optimización de velocidad",
+        "Integración con APIs"
+      ],
+      "beneficios": [
+        "Sitios web de alto rendimiento",
+        "Experiencia de usuario optimizada",
+        "Mayor tasa de conversión",
+        "Escalabilidad garantizada"
+      ]
+    },
+    {
+      "id": "branding",
+      "titulo": "Branding",
+      "descripcion": "Desarrollo de identidad de marca memorable y efectiva que conecta con tu audiencia.",
+      "imagen": "/uploads/branding.jpg",
+      "caracteristicas": [
+        "Diseño de logo",
+        "Identidad visual",
+        "Guía de marca",
+        "Diseño de materiales",
+        "Estrategia de marca",
+        "Posicionamiento"
+      ],
+      "beneficios": [
+        "Marca diferenciada",
+        "Coherencia visual",
+        "Reconocimiento de marca",
+        "Conexión emocional"
+      ]
+    },
+    {
+      "id": "social-media",
+      "titulo": "Social Media",
+      "descripcion": "Gestión profesional de redes sociales para construir una comunidad engagada.",
+      "imagen": "/uploads/social-media.jpg",
+      "caracteristicas": [
+        "Estrategia de contenidos",
+        "Gestión de comunidad",
+        "Creación de contenido",
+        "Calendario editorial",
+        "Análisis de métricas",
+        "Campañas virales"
+      ],
+      "beneficios": [
+        "Mayor engagement",
+        "Comunidad activa",
+        "Contenido de valor",
+        "Presencia consistente"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "fundacion": {
+    "titulo": "Fundación BOOST",
+    "subtitulo": "Impulsando el futuro digital de las nuevas generaciones",
+    "descripcion": "Nuestra fundación se dedica a brindar educación digital gratuita a jóvenes de comunidades vulnerables, equipándolos con las habilidades necesarias para el mundo digital.",
+    "mision": "Democratizar el acceso a la educación digital y crear oportunidades para jóvenes talentosos sin recursos.",
+    "vision": "Un futuro donde todos los jóvenes tengan las herramientas digitales para transformar sus vidas y comunidades.",
+    "imagen_principal": "/uploads/fundacion-hero.jpg",
+    "programas": [
+      {
+        "nombre": "Código para Todos",
+        "descripcion": "Enseñamos programación básica y desarrollo web a jóvenes de 14-18 años",
+        "duracion": "6 meses",
+        "beneficiarios": "120 jóvenes por año",
+        "imagen": "/uploads/programa-codigo.jpg"
+      },
+      {
+        "nombre": "Marketing Digital Joven",
+        "descripcion": "Capacitación en marketing digital y emprendimiento para jóvenes de 16-22 años",
+        "duracion": "4 meses",
+        "beneficiarios": "80 jóvenes por año",
+        "imagen": "/uploads/programa-marketing.jpg"
+      },
+      {
+        "nombre": "Mentorías Tech",
+        "descripcion": "Programa de mentorías uno a uno con profesionales de la industria tech",
+        "duracion": "12 meses",
+        "beneficiarios": "50 jóvenes por año",
+        "imagen": "/uploads/programa-mentorias.jpg"
+      }
+    ],
+    "impacto": {
+      "jovenes_capacitados": "500+",
+      "empleos_conseguidos": "180+",
+      "emprendimientos_creados": "45+",
+      "comunidades_impactadas": "15+"
+    },
+    "testimonios": [
+      {
+        "nombre": "María González",
+        "edad": 19,
+        "programa": "Código para Todos",
+        "testimonio": "Gracias a la Fundación BOOST pude aprender programación y ahora trabajo como desarrolladora junior. Cambió mi vida completamente.",
+        "imagen": "/uploads/testimonio-maria.jpg"
+      },
+      {
+        "nombre": "Carlos Ruiz",
+        "edad": 21,
+        "programa": "Marketing Digital Joven",
+        "testimonio": "El programa me dio las herramientas para crear mi propia agencia de marketing. Ahora ayudo a otros emprendedores de mi comunidad.",
+        "imagen": "/uploads/testimonio-carlos.jpg"
+      }
+    ],
+    "como_ayudar": [
+      {
+        "tipo": "Donación",
+        "descripcion": "Contribuye económicamente para financiar nuestros programas",
+        "link": "/donacion",
+        "icono": "fas fa-heart"
+      },
+      {
+        "tipo": "Voluntariado",
+        "descripcion": "Comparte tu conocimiento como mentor o instructor",
+        "link": "/voluntariado",
+        "icono": "fas fa-hands-helping"
+      },
+      {
+        "tipo": "Difusión",
+        "descripcion": "Ayúdanos a llegar a más jóvenes compartiendo nuestra misión",
+        "link": "/compartir",
+        "icono": "fas fa-share-alt"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "leads": [
+    {
+      "id": "lead-001",
+      "fecha": "2024-01-15T10:30:00Z",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@email.com",
+      "telefono": "+1234567890",
+      "empresa": "TechStart",
+      "servicio_interes": "Marketing Digital",
+      "presupuesto": "5000-10000",
+      "mensaje": "Estamos interesados en mejorar nuestra presencia digital y generar más leads cualificados.",
+      "origen": "formulario-web",
+      "estado": "nuevo"
+    }
+  ],
+  "configuracion": {
+    "campos_requeridos": ["nombre", "email", "telefono", "servicio_interes"],
+    "servicios_disponibles": [
+      "Marketing Digital",
+      "Desarrollo Web",
+      "Branding",
+      "Social Media",
+      "SEO",
+      "Publicidad Digital"
+    ],
+    "rangos_presupuesto": [
+      "Menos de $2,000",
+      "$2,000 - $5,000",
+      "$5,000 - $10,000",
+      "$10,000 - $25,000",
+      "Más de $25,000"
+    ]
+  }
+}

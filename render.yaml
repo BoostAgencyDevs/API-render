@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: boost-agency-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: boost-agency-super-secret-key-2024
+    healthCheckPath: /api/contenido
+    autoDeploy: true
+    branch: main

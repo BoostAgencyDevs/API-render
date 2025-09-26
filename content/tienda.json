@@ -1,0 +1,118 @@
+{
+  "categorias": [
+    {
+      "id": "cursos",
+      "nombre": "Cursos Digitales",
+      "descripcion": "Cursos online para dominar el marketing digital"
+    },
+    {
+      "id": "templates",
+      "nombre": "Templates",
+      "descripcion": "Plantillas y recursos para marketing"
+    },
+    {
+      "id": "ebooks",
+      "nombre": "E-books",
+      "descripcion": "Guías y libros digitales"
+    }
+  ],
+  "productos": [
+    {
+      "id": "curso-marketing-digital",
+      "categoria": "cursos",
+      "nombre": "Marketing Digital Masterclass",
+      "descripcion": "Curso completo de marketing digital desde cero hasta experto",
+      "precio": 199.99,
+      "precio_descuento": 149.99,
+      "imagen": "/uploads/curso-marketing.jpg",
+      "destacado": true,
+      "caracteristicas": [
+        "40 horas de contenido",
+        "Certificado incluido",
+        "Acceso de por vida",
+        "Proyectos prácticos"
+      ],
+      "incluye": [
+        "Videos HD",
+        "Recursos descargables",
+        "Ejercicios prácticos",
+        "Soporte del instructor"
+      ]
+    },
+    {
+      "id": "template-instagram",
+      "categoria": "templates",
+      "nombre": "Pack Templates Instagram",
+      "descripcion": "100 templates editables para Instagram",
+      "precio": 49.99,
+      "precio_descuento": 39.99,
+      "imagen": "/uploads/templates-instagram.jpg",
+      "destacado": true,
+      "caracteristicas": [
+        "Formato PSD y Canva",
+        "100% editables",
+        "Diferentes estilos",
+        "Guía de uso"
+      ],
+      "incluye": [
+        "100 templates",
+        "Guía de marca",
+        "Actualizaciones gratuitas",
+        "Soporte técnico"
+      ]
+    },
+    {
+      "id": "ebook-seo",
+      "categoria": "ebooks",
+      "nombre": "Guía Completa SEO 2024",
+      "descripcion": "Todo lo que necesitas saber sobre SEO actualizado",
+      "precio": 29.99,
+      "precio_descuento": 24.99,
+      "imagen": "/uploads/ebook-seo.jpg",
+      "destacado": false,
+      "caracteristicas": [
+        "300 páginas",
+        "Casos de estudio",
+        "Estrategias actualizadas",
+        "Checklist SEO"
+      ],
+      "incluye": [
+        "Formato PDF y EPUB",
+        "Actualizaciones 2024",
+        "Recursos adicionales",
+        "Plantillas SEO"
+      ]
+    }
+  ],
+  "beneficios_compra": [
+    {
+      "titulo": "Garantía de devolución",
+      "descripcion": "30 días de garantía de devolución sin preguntas",
+      "icono": "fas fa-undo"
+    },
+    {
+      "titulo": "Acceso inmediato",
+      "descripcion": "Descarga instantánea después de la compra",
+      "icono": "fas fa-bolt"
+    },
+    {
+      "titulo": "Soporte premium",
+      "descripcion": "Soporte técnico y de contenido incluido",
+      "icono": "fas fa-headset"
+    }
+  ],
+  "metodos_pago": [
+    {
+      "nombre": "Tarjeta de crédito",
+      "imagen": "/uploads/credit-cards.png"
+    },
+    {
+      "nombre": "PayPal",
+      "imagen": "/uploads/paypal.png"
+    },
+    {
+      "nombre": "Transferencia bancaria",
+      "imagen": "/uploads/bank-transfer.png"
+    }
+  ]
+}

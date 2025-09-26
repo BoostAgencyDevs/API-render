@@ -1,0 +1,105 @@
+{
+  "boostcast": {
+    "titulo": "BOOSTCAST",
+    "subtitulo": "El podcast de marketing digital que necesitas",
+    "descripcion": "Conversaciones inspiradoras con líderes de la industria, estrategias probadas y las últimas tendencias del marketing digital.",
+    "imagen_principal": "/uploads/boostcast-hero.jpg",
+    "plataformas": [
+      {
+        "nombre": "Spotify",
+        "link": "https://spotify.com/boostcast",
+        "icono": "fab fa-spotify"
+      },
+      {
+        "nombre": "Apple Podcasts",
+        "link": "https://podcasts.apple.com/boostcast",
+        "icono": "fab fa-apple"
+      },
+      {
+        "nombre": "Google Podcasts",
+        "link": "https://podcasts.google.com/boostcast",
+        "icono": "fab fa-google"
+      },
+      {
+        "nombre": "YouTube",
+        "link": "https://youtube.com/boostcast",
+        "icono": "fab fa-youtube"
+      }
+    ]
+  },
+  "episodios": [
+    {
+      "id": "ep-001",
+      "numero": 1,
+      "titulo": "El futuro del marketing digital en 2024",
+      "descripcion": "Exploramos las tendencias que marcarán el marketing digital este año con expertos de la industria.",
+      "fecha": "2024-01-15",
+      "duracion": "45:30",
+      "invitado": "Ana Martínez",
+      "cargo_invitado": "CMO de TechCorp",
+      "imagen": "/uploads/ep001-cover.jpg",
+      "audio_url": "/audio/ep001.mp3",
+      "destacado": true,
+      "temas": [
+        "Inteligencia Artificial",
+        "Marketing de contenidos",
+        "Automatización",
+        "Personalización"
+      ]
+    },
+    {
+      "id": "ep-002",
+      "numero": 2,
+      "titulo": "Construyendo una marca personal sólida",
+      "descripcion": "Estrategias para desarrollar y fortalecer tu marca personal en el mundo digital.",
+      "fecha": "2024-01-22",
+      "duracion": "38:15",
+      "invitado": "Carlos Mendoza",
+      "cargo_invitado": "Personal Branding Expert",
+      "imagen": "/uploads/ep002-cover.jpg",
+      "audio_url": "/audio/ep002.mp3",
+      "destacado": false,
+      "temas": [
+        "Branding personal",
+        "LinkedIn",
+        "Storytelling",
+        "Networking"
+      ]
+    },
+    {
+      "id": "ep-003",
+      "numero": 3,
+      "titulo": "E-commerce: Estrategias de conversión",
+      "descripcion": "Cómo optimizar tu tienda online para maximizar las ventas y mejorar la experiencia del usuario.",
+      "fecha": "2024-01-29",
+      "duracion": "42:20",
+      "invitado": "Sofia Rodriguez",
+      "cargo_invitado": "E-commerce Specialist",
+      "imagen": "/uploads/ep003-cover.jpg",
+      "audio_url": "/audio/ep003.mp3",
+      "destacado": false,
+      "temas": [
+        "UX/UI",
+        "Conversión",
+        "Email marketing",
+        "Retargeting"
+      ]
+    }
+  ],
+  "estadisticas": {
+    "total_episodios": "25+",
+    "descargas_mensuales": "15K+",
+    "rating_promedio": "4.8",
+    "paises_alcanzados": "12+"
+  },
+  "suscripcion": {
+    "titulo": "¡No te pierdas ningún episodio!",
+    "descripcion": "Suscríbete a nuestro newsletter y recibe notificaciones de nuevos episodios, recursos exclusivos y contenido adicional.",
+    "beneficios": [
+      "Notificaciones de nuevos episodios",
+      "Recursos exclusivos para suscriptores",
+      "Transcripciones completas",
+      "Acceso anticipado a contenido especial"
+    ]
+  }
+}
