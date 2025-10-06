@@ -86,20 +86,7 @@ app.use('/api/leads', leadsRoutes);
 app.use('/api/tienda', tiendaRoutes);
 app.use('/api/upload', uploadRoutes);
 
-/**
- * GET /api/contenido (compatibilidad con frontend existente)
- * Obtiene el contenido dinámico del sitio web
- * 
- * @returns {Object} Contenido JSON del sitio
- */
-app.get('/api/contenido', (req, res) => {
-    try {
-        const contenido = require('./content/contenido.json');
-        res.json(contenido);
-    } catch (error) {
-        res.status(500).json({ error: 'Error al cargar el contenido' });
-    }
-});
+// Ruta /api/contenido manejada por routes/contenido.js
 
 /**
  * POST /api/upload (compatibilidad con frontend existente)
