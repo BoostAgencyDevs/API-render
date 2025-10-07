@@ -18,25 +18,23 @@
   ],
   "productos": [
     {
-      "id": "curso-marketing-digital",
-      "categoria": "cursos",
-      "nombre": "Marketing Digital Masterclass",
-      "descripcion": "Curso completo de marketing digital desde cero hasta experto",
-      "precio": 199.99,
-      "precio_descuento": 149.99,
-      "imagen": "/uploads/curso-marketing.jpg",
+      "id": "gorra-digital-mind",
+      "categoria": "Gorras",
+      "nombre": "Gorra Digital Mind",
+      "descripcion": "Diseño para mentes digitales.",
+      "precio": 29.99,
+      "precio_descuento": null,
+      "imagen": "assets/images/Tienda/GORRAS/Gorra_Digital_Mind.png",
       "destacado": true,
       "caracteristicas": [
-        "40 horas de contenido",
-        "Certificado incluido",
-        "Acceso de por vida",
-        "Proyectos prácticos"
+        "Material premium",
+        "Diseño exclusivo",
+        "Envío gratuito"
       ],
       "incluye": [
-        "Videos HD",
-        "Recursos descargables",
-        "Ejercicios prácticos",
-        "Soporte del instructor"
+        "Gorra",
+        "Sticker pack",
+        "Garantía"
       ]
     },
     {

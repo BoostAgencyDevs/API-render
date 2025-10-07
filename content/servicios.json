@@ -1,24 +1,22 @@
 {
   "servicios": [
     {
-      "id": "marketing-digital",
-      "titulo": "Marketing Digital",
-      "descripcion": "Estrategias integrales de marketing digital para maximizar tu presencia online y generar resultados medibles.",
-      "imagen": "/uploads/marketing-digital.jpg",
+      "id": "performance-ads",
+      "titulo": "Performance Ads",
+      "descripcion": "Publicidad digital de alto rendimiento con resultados medibles y ROI optimizado para maximizar tu inversión publicitaria.",
+      "imagen": "url_imagen",
       "caracteristicas": [
-        "SEO y posicionamiento web",
-        "Marketing de contenidos",
-        "Email marketing",
-        "Publicidad en redes sociales",
-        "Google Ads",
-        "Analítica y reportes"
+        "SEO y SEM",
+        "Redes Sociales",
+        "Email Marketing"
       ],
       "beneficios": [
-        "Mayor visibilidad online",
-        "Incremento en leads cualificados",
-        "Mejor ROI en campañas",
-        "Engagement con tu audiencia"
-      ]
+        "Mayor visibilidad",
+        "Más conversiones",
+        "ROI medible"
+      ],
+      "precio_desde": 999,
+      "activo": true
     },
     {
       "id": "desarrollo-web",

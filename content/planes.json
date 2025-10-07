@@ -2,20 +2,18 @@
   "planes": [
     {
       "id": "starter",
-      "nombre": "Starter",
-      "precio": "999",
-      "periodo": "mes",
-      "descripcion": "Ideal para pequeñas empresas que inician su presencia digital",
+      "nombre": "STARTER BOOST",
+      "precio": 800,
+      "periodo": "USD",
+      "descripcion": "Ideal para emprendedores digitales",
       "caracteristicas": [
-        "Gestión de 3 redes sociales",
-        "12 posts mensuales",
-        "Diseño básico de posts",
-        "Reporte mensual de métricas",
-        "Soporte por email"
+        "Diseño web básico",
+        "Branding esencial",
+        "1 pauta mensual"
       ],
       "destacado": false,
       "cta_texto": "Comenzar Ahora",
-      "notas": "* Compromiso mínimo de 3 meses"
+      "notas": "Sin compromiso de permanencia"
     },
     {
       "id": "professional",

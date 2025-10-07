@@ -31,21 +31,16 @@
     {
       "id": "ep-001",
       "numero": 1,
-      "titulo": "El futuro del marketing digital en 2024",
-      "descripcion": "Exploramos las tendencias que marcarán el marketing digital este año con expertos de la industria.",
-      "fecha": "2024-01-15",
+      "titulo": "El poder del marketing de contenidos",
+      "descripcion": "Cómo crear contenido cautivante y convertir clientes potenciales.",
+      "fecha": "2024-04-25",
       "duracion": "45:30",
-      "invitado": "Ana Martínez",
-      "cargo_invitado": "CMO de TechCorp",
-      "imagen": "/uploads/ep001-cover.jpg",
-      "audio_url": "/audio/ep001.mp3",
+      "invitado": "Carlos Rodríguez",
+      "cargo_invitado": "CEO de DigitalPro",
+      "imagen": "url_imagen",
+      "audio_url": "url_audio",
       "destacado": true,
-      "temas": [
-        "Inteligencia Artificial",
-        "Marketing de contenidos",
-        "Automatización",
-        "Personalización"
-      ]
+      "temas": ["marketing", "contenido", "conversión"]
     },
     {
       "id": "ep-002",

@@ -124,6 +124,144 @@ router.post('/', upload.single('file'), (req, res) => {
 });
 
 /**
+ * POST /api/upload/image
+ * Sube una imagen al servidor
+ */
+router.post('/image', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No se subió ninguna imagen'
+      });
+    }
+
+    const files = loadFiles();
+    const nuevaImagen = {
+      id: uuidv4(),
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      url: `https://boost-agency-api.onrender.com/uploads/${req.file.filename}`,
+      size: req.file.size,
+      type: req.file.mimetype,
+      uploadedAt: new Date().toISOString()
+    };
+
+    files.push(nuevaImagen);
+    saveFiles(files);
+
+    res.json({
+      success: true,
+      data: {
+        url: nuevaImagen.url,
+        filename: nuevaImagen.filename,
+        size: nuevaImagen.size,
+        type: nuevaImagen.type
+      },
+      message: 'Imagen subida correctamente'
+    });
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error al subir la imagen'
+    });
+  }
+});
+
+/**
+ * POST /api/upload/audio
+ * Sube un archivo de audio al servidor
+ */
+router.post('/audio', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No se subió ningún archivo de audio'
+      });
+    }
+
+    const files = loadFiles();
+    const nuevoAudio = {
+      id: uuidv4(),
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      url: `https://boost-agency-api.onrender.com/uploads/${req.file.filename}`,
+      size: req.file.size,
+      type: req.file.mimetype,
+      uploadedAt: new Date().toISOString()
+    };
+
+    files.push(nuevoAudio);
+    saveFiles(files);
+
+    res.json({
+      success: true,
+      data: {
+        url: nuevoAudio.url,
+        filename: nuevoAudio.filename,
+        size: nuevoAudio.size,
+        type: nuevoAudio.type
+      },
+      message: 'Audio subido correctamente'
+    });
+  } catch (error) {
+    console.error('Error uploading audio:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error al subir el audio'
+    });
+  }
+});
+
+/**
+ * POST /api/upload/video
+ * Sube un archivo de video al servidor
+ */
+router.post('/video', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No se subió ningún archivo de video'
+      });
+    }
+
+    const files = loadFiles();
+    const nuevoVideo = {
+      id: uuidv4(),
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      url: `https://boost-agency-api.onrender.com/uploads/${req.file.filename}`,
+      size: req.file.size,
+      type: req.file.mimetype,
+      uploadedAt: new Date().toISOString()
+    };
+
+    files.push(nuevoVideo);
+    saveFiles(files);
+
+    res.json({
+      success: true,
+      data: {
+        url: nuevoVideo.url,
+        filename: nuevoVideo.filename,
+        size: nuevoVideo.size,
+        type: nuevoVideo.type
+      },
+      message: 'Video subido correctamente'
+    });
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error al subir el video'
+    });
+  }
+});
+
+/**
  * GET /api/upload/list
  * Lista todos los archivos subidos
  */
