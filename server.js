@@ -75,6 +75,9 @@ const planesRoutes = require('./routes/planes');
 const leadsRoutes = require('./routes/leads');
 const tiendaRoutes = require('./routes/tienda');
 const uploadRoutes = require('./routes/upload');
+const usersRoutes = require('./routes/users');
+const imagesRoutes = require('./routes/images');
+const themesRoutes = require('./routes/themes');
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
@@ -85,6 +88,15 @@ app.use('/api/planes', planesRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/tienda', tiendaRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/images', imagesRoutes);
+app.use('/api/themes', themesRoutes);
+
+// Rutas de compatibilidad para el dashboard (nombres en inglés)
+app.use('/api/content', contenidoRoutes);    // Alias para /api/contenido
+app.use('/api/services', serviciosRoutes);   // Alias para /api/servicios
+app.use('/api/plans', planesRoutes);         // Alias para /api/planes
+app.use('/api/products', tiendaRoutes);      // Alias para /api/tienda/productos
 
 // Ruta /api/contenido manejada por routes/contenido.js
 
