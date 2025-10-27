@@ -1,57 +1,44 @@
 /**
  * @fileoverview Rutas de autenticación para Boost Agency API
  *
- * Maneja login, logout, registro y gestión de usuarios
+ * 🆕 ARCHIVO NUEVO - No existía en la versión JSON
+ *
+ * Maneja:
+ * - Login (generación de JWT)
+ * - Registro de usuarios
+ * - Verificación de token
+ * - Cambio de contraseña
+ * - Reset de contraseña
  *
  * @author Boost Agency Development Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const { v4: uuidv4 } = require("uuid");
-const { loadUsers, saveUsers } = require("../middleware/auth");
+const { authenticateToken } = require("../middleware/auth");
+const User = require("../models/User");
 const router = express.Router();
 
-// Inicializar usuario admin por defecto si no existe
-const initializeDefaultUser = () => {
-  const users = loadUsers();
-  const adminExists = users.find(
-    (user) => user.email === "admin@boostagency.com"
-  );
-
-  if (!adminExists) {
-    const hashedPassword = bcrypt.hashSync("admin123", 10);
-    const adminUser = {
-      id: uuidv4(),
-      email: "admin@boostagency.com",
-      password: hashedPassword,
-      name: "Administrador",
-      role: "admin",
-      active: true,
-      createdAt: new Date().toISOString(),
-      lastLogin: null,
-    };
-
-    users.push(adminUser);
-    saveUsers(users);
-    console.log("✅ Usuario admin creado: admin@boostagency.com / admin123");
-  }
-};
-
-// Inicializar usuario por defecto
-initializeDefaultUser();
+// Configuración JWT
+const JWT_SECRET = process.env.JWT_SECRET || "boost-agency-secret-key";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 /**
  * POST /api/auth/login
- * Autentica un usuario y devuelve un token JWT
+ * Inicia sesión y devuelve un token JWT
+ *
+ * Body:
+ * {
+ *   "email": "admin@boostagency.com",
+ *   "password": "Admin123!"
+ * }
  */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validar datos de entrada
+    // Validar campos requeridos
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -59,9 +46,8 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Buscar usuario
-    const users = loadUsers();
-    const user = users.find((u) => u.email === email && u.active);
+    // Buscar usuario con contraseña incluida
+    const user = await User.findByEmail(email, true);
 
     if (!user) {
       return res.status(401).json({
@@ -70,14 +56,29 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // Verificar que el usuario esté activo
+    if (user.status !== "active") {
+      return res.status(403).json({
+        success: false,
+        error: "Usuario inactivo o suspendido",
+      });
+    }
+
     // Verificar contraseña
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
+    const isPasswordValid = await User.verifyPassword(
+      password,
+      user.password_hash
+    );
+
+    if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
         error: "Credenciales inválidas",
       });
     }
+
+    // Actualizar último login
+    await User.updateLastLogin(user.id);
 
     // Generar token JWT
     const token = jwt.sign(
@@ -86,84 +87,116 @@ router.post("/login", async (req, res) => {
         email: user.email,
         role: user.role,
       },
-      process.env.JWT_SECRET || "boost-agency-secret-key",
-      { expiresIn: "24h" }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
     );
 
-    // Actualizar último login
-    user.lastLogin = new Date().toISOString();
-    saveUsers(users);
-
+    // Devolver token y datos del usuario (sin password_hash)
     res.json({
       success: true,
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+      message: "Login exitoso",
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role,
+          avatar_url: user.avatar_url,
+        },
       },
-      expiresIn: 86400, // 24 horas
     });
   } catch (error) {
     console.error("Error en login:", error);
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor",
+      error: "Error en el proceso de autenticación",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 /**
- * POST /api/auth/refresh
- * Renueva un token JWT válido
+ * POST /api/auth/register
+ * Registra un nuevo usuario (solo admins pueden crear usuarios)
+ *
+ * Body:
+ * {
+ *   "email": "nuevo@boostagency.com",
+ *   "password": "Password123!",
+ *   "full_name": "Nombre Completo",
+ *   "role": "user",
+ *   "phone": "+1234567890"
+ * }
  */
-router.post("/refresh", (req, res) => {
+router.post("/register", authenticateToken, async (req, res) => {
   try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(400).json({
+    // Solo admins pueden crear usuarios
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
         success: false,
-        error: "Token requerido",
+        error: "Solo administradores pueden crear usuarios",
       });
     }
 
-    // Verificar token actual
-    jwt.verify(
-      token,
-      process.env.JWT_SECRET || "boost-agency-secret-key",
-      (err, decoded) => {
-        if (err) {
-          return res.status(403).json({
-            success: false,
-            error: "Token inválido",
-          });
-        }
+    const { email, password, full_name, role, phone } = req.body;
 
-        // Generar nuevo token
-        const newToken = jwt.sign(
-          {
-            id: decoded.id,
-            email: decoded.email,
-            role: decoded.role,
-          },
-          process.env.JWT_SECRET || "boost-agency-secret-key",
-          { expiresIn: "24h" }
-        );
+    // Validar campos requeridos
+    if (!email || !password || !full_name) {
+      return res.status(400).json({
+        success: false,
+        error: "Email, contraseña y nombre completo son requeridos",
+      });
+    }
 
-        res.json({
-          success: true,
-          token: newToken,
-          expiresIn: 86400,
-        });
-      }
-    );
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: "Formato de email inválido",
+      });
+    }
+
+    // Validar contraseña (mínimo 8 caracteres, una mayúscula, un número)
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "La contraseña debe tener al menos 8 caracteres",
+      });
+    }
+
+    // Verificar si el email ya existe
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        error: "El email ya está registrado",
+      });
+    }
+
+    // Crear usuario
+    const newUser = await User.create({
+      email,
+      password,
+      full_name,
+      role: role || "user",
+      phone,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Usuario creado exitosamente",
+      data: newUser,
+    });
   } catch (error) {
-    console.error("Error en refresh:", error);
+    console.error("Error en registro:", error);
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor",
+      error: "Error al crear el usuario",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -171,140 +204,227 @@ router.post("/refresh", (req, res) => {
 /**
  * GET /api/auth/me
  * Obtiene información del usuario autenticado
+ * Útil para verificar si el token sigue válido
  */
-router.get("/me", (req, res) => {
+router.get("/me", authenticateToken, async (req, res) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const user = await User.findById(req.user.id);
 
-    if (!token) {
-      return res.status(401).json({
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        error: "Token requerido",
+        error: "Usuario no encontrado",
       });
     }
 
-    jwt.verify(
-      token,
-      process.env.JWT_SECRET || "boost-agency-secret-key",
-      (err, decoded) => {
-        if (err) {
-          return res.status(403).json({
-            success: false,
-            error: "Token inválido",
-          });
-        }
-
-        const users = loadUsers();
-        const user = users.find((u) => u.id === decoded.id);
-
-        if (!user) {
-          return res.status(404).json({
-            success: false,
-            error: "Usuario no encontrado",
-          });
-        }
-
-        res.json({
-          success: true,
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            lastLogin: user.lastLogin,
-          },
-        });
-      }
-    );
+    res.json({
+      success: true,
+      data: user,
+    });
   } catch (error) {
-    console.error("Error en /me:", error);
+    console.error("Error obteniendo usuario:", error);
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor",
+      error: "Error al obtener información del usuario",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * PUT /api/auth/change-password
+ * Cambia la contraseña del usuario autenticado
+ *
+ * Body:
+ * {
+ *   "current_password": "Password123!",
+ *   "new_password": "NewPassword456!"
+ * }
+ */
+router.put("/change-password", authenticateToken, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+
+    // Validar campos requeridos
+    if (!current_password || !new_password) {
+      return res.status(400).json({
+        success: false,
+        error: "Contraseña actual y nueva contraseña son requeridas",
+      });
+    }
+
+    // Validar nueva contraseña
+    if (new_password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "La nueva contraseña debe tener al menos 8 caracteres",
+      });
+    }
+
+    // Obtener usuario con contraseña
+    const user = await User.findByEmail(req.user.email, true);
+
+    // Verificar contraseña actual
+    const isPasswordValid = await User.verifyPassword(
+      current_password,
+      user.password_hash
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        error: "Contraseña actual incorrecta",
+      });
+    }
+
+    // Cambiar contraseña
+    await User.changePassword(req.user.id, new_password);
+
+    res.json({
+      success: true,
+      message: "Contraseña actualizada exitosamente",
+    });
+  } catch (error) {
+    console.error("Error cambiando contraseña:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error al cambiar la contraseña",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * POST /api/auth/reset-password/:userId
+ * Resetea la contraseña de un usuario (solo admins)
+ *
+ * Body:
+ * {
+ *   "new_password": "TempPassword123!"
+ * }
+ */
+router.post("/reset-password/:userId", authenticateToken, async (req, res) => {
+  try {
+    // Solo admins pueden resetear contraseñas
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        error: "Solo administradores pueden resetear contraseñas",
+      });
+    }
+
+    const { userId } = req.params;
+    const { new_password } = req.body;
+
+    if (!new_password) {
+      return res.status(400).json({
+        success: false,
+        error: "Nueva contraseña es requerida",
+      });
+    }
+
+    if (new_password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "La contraseña debe tener al menos 8 caracteres",
+      });
+    }
+
+    // Verificar que el usuario existe
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "Usuario no encontrado",
+      });
+    }
+
+    // Cambiar contraseña
+    await User.changePassword(userId, new_password);
+
+    res.json({
+      success: true,
+      message: "Contraseña reseteada exitosamente",
+    });
+  } catch (error) {
+    console.error("Error reseteando contraseña:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error al resetear la contraseña",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * POST /api/auth/refresh
+ * Renueva el token JWT (útil antes de que expire)
+ */
+router.post("/refresh", authenticateToken, async (req, res) => {
+  try {
+    // Verificar que el usuario siga activo
+    const user = await User.findById(req.user.id);
+
+    if (!user || user.status !== "active") {
+      return res.status(403).json({
+        success: false,
+        error: "Usuario no válido para renovar token",
+      });
+    }
+
+    // Generar nuevo token
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    res.json({
+      success: true,
+      message: "Token renovado exitosamente",
+      data: {
+        token,
+      },
+    });
+  } catch (error) {
+    console.error("Error renovando token:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error al renovar el token",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 /**
  * POST /api/auth/logout
- * Cierra la sesión del usuario (en el cliente)
+ * Cierra sesión (del lado del cliente debe eliminar el token)
+ * Esta ruta existe principalmente para logging/auditoría
  */
-router.post("/logout", (req, res) => {
-  res.json({
-    success: true,
-    message: "Sesión cerrada exitosamente",
-  });
-});
-
-/**
- * POST /api/auth/register
- * Registra un nuevo usuario (solo admin)
- */
-router.post("/register", async (req, res) => {
+router.post("/logout", authenticateToken, async (req, res) => {
   try {
-    // AHORA extraemos todos los campos del formulario de Angular
-    const {
-      email,
-      password,
-      name,
-      lastname,
-      username,
-      role = "editor",
-    } = req.body; // Validar datos de entrada (incluyendo lastname y username)
+    // Aquí podrías agregar lógica para invalidar tokens
+    // o registrar el logout en una tabla de auditoría
 
-    if (!email || !password || !name || !lastname || !username) {
-      // <--- CAMBIO AQUÍ
-      return res.status(400).json({
-        success: false,
-        error:
-          "Email, contraseña, nombre, apellido y nombre de usuario son requeridos", // <--- MENSAJE DE ERROR ACTUALIZADO
-      });
-    } // Verificar que el email no exista
-
-    const users = loadUsers();
-    const existingUser = users.find((u) => u.email === email);
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        error: "El email ya está registrado",
-      });
-    } // Crear nuevo usuario
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: uuidv4(),
-      email,
-      password: hashedPassword,
-      name,
-      lastname, // <--- AÑADIDO AQUÍ
-      username, // <--- AÑADIDO AQUÍ
-      role: ["admin", "editor", "viewer"].includes(role) ? role : "editor",
-      active: true,
-      createdAt: new Date().toISOString(),
-      lastLogin: null,
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    res.status(201).json({
+    res.json({
       success: true,
-      message: "Usuario creado exitosamente",
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        lastname: newUser.lastname, // <--- AÑADIDO AQUÍ
-        username: newUser.username, // <--- AÑADIDO AQUÍ
-        role: newUser.role,
-      },
+      message: "Sesión cerrada exitosamente",
     });
   } catch (error) {
-    console.error("Error en registro:", error);
+    console.error("Error en logout:", error);
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor",
+      error: "Error al cerrar sesión",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });

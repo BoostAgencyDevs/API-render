@@ -1,478 +1,548 @@
 /**
- * @fileoverview Rutas de gestión de tienda para Boost Agency API
- * 
- * Maneja CRUD de productos y categorías de la tienda
- * 
+ * @fileoverview Rutas de gestión de la tienda digital
+ *
+ * 🆕 ARCHIVO NUEVO - Reemplaza tienda.json
+ *
+ * Gestiona productos digitales:
+ * - Cursos
+ * - Templates
+ * - E-books
+ *
  * @author Boost Agency Development Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const express = require("express");
+const { authenticateToken, requireEditor } = require("../middleware/auth");
+const Product = require("../models/Product");
 const router = express.Router();
 
-// Cargar tienda desde archivo JSON
-const loadTienda = () => {
-  try {
-    const tiendaPath = path.join(__dirname, '../content/tienda.json');
-    return JSON.parse(fs.readFileSync(tiendaPath, 'utf8'));
-  } catch (error) {
-    console.error('Error loading tienda:', error);
-    return { categorias: [], productos: [], beneficios_compra: [], metodos_pago: [] };
-  }
-};
-
-// Guardar tienda en archivo JSON
-const saveTienda = (tienda) => {
-  try {
-    const tiendaPath = path.join(__dirname, '../content/tienda.json');
-    fs.writeFileSync(tiendaPath, JSON.stringify(tienda, null, 2));
-    return true;
-  } catch (error) {
-    console.error('Error saving tienda:', error);
-    return false;
-  }
-};
-
-// ==================== PRODUCTOS ====================
-
 /**
- * GET /api/tienda/productos
- * Obtiene todos los productos
+ * GET /api/tienda
+ * Obtiene todos los productos con paginación y filtros
+ *
+ * Query params:
+ * - page: número de página (default: 1)
+ * - limit: productos por página (default: 20)
+ * - category_id: UUID de la categoría
+ * - status: 'active', 'inactive'
+ * - onlyFeatured: true/false
  */
-router.get('/productos', (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const { categoria, destacado, page = 1, limit = 20 } = req.query;
-    const data = loadTienda();
-    let productos = data.productos || [];
+    const { page, limit, category_id, status, onlyFeatured } = req.query;
 
-    // Aplicar filtros
-    if (categoria) {
-      productos = productos.filter(p => p.categoria === categoria);
-    }
-    
-    if (destacado !== undefined) {
-      productos = productos.filter(p => p.destacado === (destacado === 'true'));
-    }
-
-    // Paginación
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + parseInt(limit);
-    const paginatedProductos = productos.slice(startIndex, endIndex);
+    const result = await Product.findAll({
+      page: page ? parseInt(page) : 1,
+      limit: limit ? parseInt(limit) : 20,
+      category_id,
+      status: status || "active",
+      onlyFeatured: onlyFeatured === "true",
+    });
 
     res.json({
       success: true,
-      data: paginatedProductos,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total: productos.length,
-        pages: Math.ceil(productos.length / limit)
-      }
+      data: result.products,
+      pagination: result.pagination,
     });
   } catch (error) {
-    console.error('Error getting productos:', error);
+    console.error("Error obteniendo productos:", error);
     res.status(500).json({
       success: false,
-      error: 'Error al cargar los productos'
+      error: "Error al cargar los productos",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 /**
- * GET /api/tienda/productos/:id
- * Obtiene un producto específico por ID
+ * GET /api/tienda/featured
+ * Obtiene productos destacados
+ *
+ * Query params:
+ * - limit: cantidad (default: 3)
  */
-router.get('/productos/:id', (req, res) => {
+router.get("/featured", async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = loadTienda();
-    const producto = data.productos.find(p => p.id === id);
+    const { limit } = req.query;
 
-    if (!producto) {
-      return res.status(404).json({
-        success: false,
-        error: 'Producto no encontrado'
-      });
-    }
+    const products = await Product.getFeatured(limit ? parseInt(limit) : 3);
 
     res.json({
       success: true,
-      data: producto
+      data: products,
+      count: products.length,
     });
   } catch (error) {
-    console.error('Error getting producto:', error);
+    console.error("Error obteniendo productos destacados:", error);
     res.status(500).json({
       success: false,
-      error: 'Error al cargar el producto'
+      error: "Error al cargar los productos destacados",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 /**
- * POST /api/tienda/productos
- * Crea un nuevo producto
+ * GET /api/tienda/search
+ * Busca productos por texto
+ *
+ * Query params:
+ * - q: término de búsqueda
+ * - limit: máximo de resultados (default: 10)
  */
-router.post('/productos', authenticateToken, requireRole(['admin', 'editor']), (req, res) => {
+router.get("/search", async (req, res) => {
   try {
-    const { 
-      categoria, 
-      nombre, 
-      descripcion, 
-      precio, 
-      precio_descuento, 
-      imagen, 
-      destacado, 
-      caracteristicas, 
-      incluye 
-    } = req.body;
+    const { q, limit } = req.query;
 
-    // Validar datos requeridos
-    if (!categoria || !nombre || !precio) {
+    if (!q || q.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        error: 'Categoría, nombre y precio son requeridos'
+        error: "El término de búsqueda debe tener al menos 2 caracteres",
       });
     }
 
-    const data = loadTienda();
-    const nuevoProducto = {
-      id: uuidv4(),
-      categoria,
-      nombre,
-      descripcion: descripcion || '',
-      precio: parseFloat(precio),
-      precio_descuento: precio_descuento ? parseFloat(precio_descuento) : null,
-      imagen: imagen || '/uploads/producto-default.jpg',
-      destacado: destacado || false,
-      caracteristicas: caracteristicas || [],
-      incluye: incluye || []
-    };
+    const products = await Product.search(q, limit ? parseInt(limit) : 10);
 
-    data.productos.push(nuevoProducto);
-
-    if (saveTienda(data)) {
-      res.status(201).json({
-        success: true,
-        message: 'Producto creado exitosamente',
-        data: nuevoProducto
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Error al guardar el producto'
-      });
-    }
+    res.json({
+      success: true,
+      data: products,
+      count: products.length,
+    });
   } catch (error) {
-    console.error('Error creating producto:', error);
+    console.error("Error buscando productos:", error);
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: "Error en la búsqueda",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 /**
- * PUT /api/tienda/productos/:id
+ * GET /api/tienda/categoria/:categorySlug
+ * Obtiene productos de una categoría específica
+ *
+ * Ejemplo: GET /api/tienda/categoria/cursos
+ */
+router.get("/categoria/:categorySlug", async (req, res) => {
+  try {
+    const { categorySlug } = req.params;
+
+    const products = await Product.getByCategory(categorySlug);
+
+    res.json({
+      success: true,
+      data: products,
+      count: products.length,
+    });
+  } catch (error) {
+    console.error("Error obteniendo productos por categoría:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error al cargar los productos",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * GET /api/tienda/:productId
+ * Obtiene un producto específico por su product_id
+ *
+ * Ejemplo: GET /api/tienda/curso-marketing-digital
+ */
+router.get("/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.getByProductId(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        error: "Producto no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    console.error("Error obteniendo producto:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error al cargar el producto",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * POST /api/tienda
+ * Crea un nuevo producto
+ *
+ * Body:
+ * {
+ *   "product_id": "nuevo-curso",
+ *   "name": "Nombre del Producto",
+ *   "description": "Descripción completa",
+ *   "price": 199.99,
+ *   "discount_price": 149.99,
+ *   "image_url": "/uploads/producto.jpg",
+ *   "features": ["Característica 1", "Característica 2"],
+ *   "includes": ["Incluye 1", "Incluye 2"],
+ *   "category_id": "uuid-de-categoria",
+ *   "is_featured": false,
+ *   "display_order": 1
+ * }
+ */
+router.post("/", authenticateToken, requireEditor, async (req, res) => {
+  try {
+    const {
+      product_id,
+      name,
+      description,
+      price,
+      discount_price,
+      price_currency,
+      image_url,
+      is_featured,
+      features,
+      includes,
+      category_id,
+      display_order,
+      status,
+    } = req.body;
+
+    // Validar campos requeridos
+    if (!product_id || !name || !description || !price) {
+      return res.status(400).json({
+        success: false,
+        error: "product_id, name, description y price son requeridos",
+      });
+    }
+
+    // Validar que product_id sea lowercase con guiones
+    if (!/^[a-z0-9-]+$/.test(product_id)) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "product_id debe ser lowercase y solo contener letras, números y guiones",
+      });
+    }
+
+    // Validar precio
+    if (isNaN(price) || price < 0) {
+      return res.status(400).json({
+        success: false,
+        error: "price debe ser un número positivo",
+      });
+    }
+
+    // Validar precio de descuento si existe
+    if (
+      discount_price !== undefined &&
+      (isNaN(discount_price) || discount_price < 0)
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "discount_price debe ser un número positivo",
+      });
+    }
+
+    const newProduct = await Product.create({
+      product_id,
+      name,
+      description,
+      price: parseFloat(price),
+      discount_price: discount_price ? parseFloat(discount_price) : null,
+      price_currency: price_currency || "USD",
+      image_url,
+      is_featured: is_featured || false,
+      features: features || [],
+      includes: includes || [],
+      category_id,
+      display_order: display_order || 0,
+      status: status || "active",
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Producto creado exitosamente",
+      data: newProduct,
+    });
+  } catch (error) {
+    console.error("Error creando producto:", error);
+
+    if (
+      error.message.includes("duplicate") ||
+      error.message.includes("already exists")
+    ) {
+      return res.status(409).json({
+        success: false,
+        error: "Ya existe un producto con ese product_id",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al crear el producto",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * PUT /api/tienda/:productId
  * Actualiza un producto existente
  */
-router.put('/productos/:id', authenticateToken, requireRole(['admin', 'editor']), (req, res) => {
-  try {
-    const { id } = req.params;
-    const { 
-      categoria, 
-      nombre, 
-      descripcion, 
-      precio, 
-      precio_descuento, 
-      imagen, 
-      destacado, 
-      caracteristicas, 
-      incluye 
-    } = req.body;
+router.put(
+  "/:productId",
+  authenticateToken,
+  requireEditor,
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const updates = req.body;
 
-    const data = loadTienda();
-    const productoIndex = data.productos.findIndex(p => p.id === id);
+      // Remover campos que no deben actualizarse
+      delete updates.product_id;
+      delete updates.id;
+      delete updates.created_at;
 
-    if (productoIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Producto no encontrado'
-      });
-    }
+      const productUpdated = await Product.update(productId, updates);
 
-    // Actualizar producto
-    data.productos[productoIndex] = {
-      ...data.productos[productoIndex],
-      categoria: categoria || data.productos[productoIndex].categoria,
-      nombre: nombre || data.productos[productoIndex].nombre,
-      descripcion: descripcion || data.productos[productoIndex].descripcion,
-      precio: precio ? parseFloat(precio) : data.productos[productoIndex].precio,
-      precio_descuento: precio_descuento ? parseFloat(precio_descuento) : data.productos[productoIndex].precio_descuento,
-      imagen: imagen || data.productos[productoIndex].imagen,
-      destacado: destacado !== undefined ? destacado : data.productos[productoIndex].destacado,
-      caracteristicas: caracteristicas || data.productos[productoIndex].caracteristicas,
-      incluye: incluye || data.productos[productoIndex].incluye
-    };
-
-    if (saveTienda(data)) {
       res.json({
         success: true,
-        message: 'Producto actualizado exitosamente',
-        data: data.productos[productoIndex]
+        message: "Producto actualizado exitosamente",
+        data: productUpdated,
       });
-    } else {
+    } catch (error) {
+      console.error("Error actualizando producto:", error);
+
+      if (error.message.includes("no encontrado")) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (error.message.includes("No hay campos válidos")) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
       res.status(500).json({
         success: false,
-        error: 'Error al guardar el producto'
+        error: "Error al actualizar el producto",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
-  } catch (error) {
-    console.error('Error updating producto:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error interno del servidor'
-    });
   }
-});
+);
 
 /**
- * DELETE /api/tienda/productos/:id
- * Elimina un producto
+ * PATCH /api/tienda/:productId/status
+ * Cambia el estado de un producto
+ *
+ * Body:
+ * {
+ *   "status": "inactive"
+ * }
  */
-router.delete('/productos/:id', authenticateToken, requireRole(['admin']), (req, res) => {
-  try {
-    const { id } = req.params;
+router.patch(
+  "/:productId/status",
+  authenticateToken,
+  requireEditor,
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const { status } = req.body;
 
-    const data = loadTienda();
-    const productoIndex = data.productos.findIndex(p => p.id === id);
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          error: "El campo status es requerido",
+        });
+      }
 
-    if (productoIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Producto no encontrado'
-      });
-    }
+      const productUpdated = await Product.changeStatus(productId, status);
 
-    const productoEliminado = data.productos.splice(productoIndex, 1)[0];
-
-    if (saveTienda(data)) {
       res.json({
         success: true,
-        message: 'Producto eliminado exitosamente',
-        data: productoEliminado
+        message: `Producto ${
+          status === "active" ? "activado" : "desactivado"
+        } exitosamente`,
+        data: productUpdated,
       });
-    } else {
+    } catch (error) {
+      console.error("Error cambiando estado del producto:", error);
+
+      if (error.message.includes("Estado inválido")) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (error.message.includes("no encontrado")) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
       res.status(500).json({
         success: false,
-        error: 'Error al guardar los cambios'
+        error: "Error al cambiar el estado",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
-  } catch (error) {
-    console.error('Error deleting producto:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error interno del servidor'
-    });
   }
-});
-
-// ==================== CATEGORÍAS ====================
+);
 
 /**
- * GET /api/tienda/categorias
- * Obtiene todas las categorías
+ * PATCH /api/tienda/:productId/featured
+ * Marca/desmarca un producto como destacado
+ *
+ * Body:
+ * {
+ *   "featured": true
+ * }
  */
-router.get('/categorias', (req, res) => {
-  try {
-    const data = loadTienda();
-    res.json({
-      success: true,
-      data: data.categorias || []
-    });
-  } catch (error) {
-    console.error('Error getting categorias:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error al cargar las categorías'
-    });
-  }
-});
+router.patch(
+  "/:productId/featured",
+  authenticateToken,
+  requireEditor,
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const { featured } = req.body;
 
-/**
- * GET /api/tienda/categorias/:id
- * Obtiene una categoría específica por ID
- */
-router.get('/categorias/:id', (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = loadTienda();
-    const categoria = data.categorias.find(c => c.id === id);
+      if (featured === undefined) {
+        return res.status(400).json({
+          success: false,
+          error: "El campo featured es requerido",
+        });
+      }
 
-    if (!categoria) {
-      return res.status(404).json({
+      const productUpdated = await Product.setFeatured(productId, featured);
+
+      res.json({
+        success: true,
+        message: `Producto ${
+          featured ? "destacado" : "no destacado"
+        } exitosamente`,
+        data: productUpdated,
+      });
+    } catch (error) {
+      console.error("Error cambiando featured:", error);
+
+      if (error.message.includes("no encontrado")) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      res.status(500).json({
         success: false,
-        error: 'Categoría no encontrada'
+        error: "Error al actualizar el producto",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
-
-    res.json({
-      success: true,
-      data: categoria
-    });
-  } catch (error) {
-    console.error('Error getting categoria:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error al cargar la categoría'
-    });
   }
-});
+);
 
 /**
- * POST /api/tienda/categorias
- * Crea una nueva categoría
+ * POST /api/tienda/reorder
+ * Reordena los productos
+ *
+ * Body:
+ * {
+ *   "order": [
+ *     { "product_id": "curso-marketing", "order": 1 },
+ *     { "product_id": "template-instagram", "order": 2 }
+ *   ]
+ * }
  */
-router.post('/categorias', authenticateToken, requireRole(['admin', 'editor']), (req, res) => {
+router.post("/reorder", authenticateToken, requireEditor, async (req, res) => {
   try {
-    const { nombre, descripcion } = req.body;
+    const { order } = req.body;
 
-    // Validar datos requeridos
-    if (!nombre) {
+    if (!Array.isArray(order)) {
       return res.status(400).json({
         success: false,
-        error: 'Nombre es requerido'
+        error: "El campo order debe ser un array",
       });
     }
 
-    const data = loadTienda();
-    const nuevaCategoria = {
-      id: uuidv4(),
-      nombre,
-      descripcion: descripcion || ''
-    };
+    await Product.reorder(order);
 
-    data.categorias.push(nuevaCategoria);
-
-    if (saveTienda(data)) {
-      res.status(201).json({
-        success: true,
-        message: 'Categoría creada exitosamente',
-        data: nuevaCategoria
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Error al guardar la categoría'
-      });
-    }
+    res.json({
+      success: true,
+      message: "Productos reordenados exitosamente",
+    });
   } catch (error) {
-    console.error('Error creating categoria:', error);
+    console.error("Error reordenando productos:", error);
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: "Error al reordenar los productos",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 /**
- * PUT /api/tienda/categorias/:id
- * Actualiza una categoría existente
+ * DELETE /api/tienda/:productId
+ * Elimina un producto (soft delete - lo desactiva)
  */
-router.put('/categorias/:id', authenticateToken, requireRole(['admin', 'editor']), (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nombre, descripcion } = req.body;
+router.delete(
+  "/:productId",
+  authenticateToken,
+  requireEditor,
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
 
-    const data = loadTienda();
-    const categoriaIndex = data.categorias.findIndex(c => c.id === id);
+      await Product.delete(productId);
 
-    if (categoriaIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Categoría no encontrada'
-      });
-    }
-
-    // Actualizar categoría
-    data.categorias[categoriaIndex] = {
-      ...data.categorias[categoriaIndex],
-      nombre: nombre || data.categorias[categoriaIndex].nombre,
-      descripcion: descripcion || data.categorias[categoriaIndex].descripcion
-    };
-
-    if (saveTienda(data)) {
       res.json({
         success: true,
-        message: 'Categoría actualizada exitosamente',
-        data: data.categorias[categoriaIndex]
+        message: "Producto eliminado exitosamente",
       });
-    } else {
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+
+      if (error.message.includes("no encontrado")) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
       res.status(500).json({
         success: false,
-        error: 'Error al guardar la categoría'
+        error: "Error al eliminar el producto",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
-  } catch (error) {
-    console.error('Error updating categoria:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error interno del servidor'
-    });
   }
-});
-
-/**
- * DELETE /api/tienda/categorias/:id
- * Elimina una categoría
- */
-router.delete('/categorias/:id', authenticateToken, requireRole(['admin']), (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const data = loadTienda();
-    const categoriaIndex = data.categorias.findIndex(c => c.id === id);
-
-    if (categoriaIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Categoría no encontrada'
-      });
-    }
-
-    // Verificar que no haya productos usando esta categoría
-    const productosEnCategoria = data.productos.filter(p => p.categoria === id);
-    if (productosEnCategoria.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No se puede eliminar la categoría porque tiene productos asociados'
-      });
-    }
-
-    const categoriaEliminada = data.categorias.splice(categoriaIndex, 1)[0];
-
-    if (saveTienda(data)) {
-      res.json({
-        success: true,
-        message: 'Categoría eliminada exitosamente',
-        data: categoriaEliminada
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Error al guardar los cambios'
-      });
-    }
-  } catch (error) {
-    console.error('Error deleting categoria:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error interno del servidor'
-    });
-  }
-});
+);
 
 module.exports = router;

@@ -1,90 +1,100 @@
 /**
  * @fileoverview Middleware de autenticación para Boost Agency API
- * 
- * Maneja la autenticación JWT y verificación de roles
- * 
+ *
+ * ACTUALIZADO PARA POSTGRESQL
+ *
+ * Cambios principales:
+ * - ❌ Eliminado: loadUsers() y saveUsers() con archivos JSON
+ * - ✅ Nuevo: Usa el modelo User de PostgreSQL
+ * - ✅ Nuevo: Validación de usuarios desde base de datos
+ *
  * @author Boost Agency Development Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-
-// Cargar usuarios desde archivo JSON
-const loadUsers = () => {
-  try {
-    const usersPath = path.join(__dirname, '../database/users.json');
-    if (fs.existsSync(usersPath)) {
-      return JSON.parse(fs.readFileSync(usersPath, 'utf8'));
-    }
-    return [];
-  } catch (error) {
-    console.error('Error loading users:', error);
-    return [];
-  }
-};
-
-// Guardar usuarios en archivo JSON
-const saveUsers = (users) => {
-  try {
-    const usersPath = path.join(__dirname, '../database/users.json');
-    const usersDir = path.dirname(usersPath);
-    
-    if (!fs.existsSync(usersDir)) {
-      fs.mkdirSync(usersDir, { recursive: true });
-    }
-    
-    fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
-  } catch (error) {
-    console.error('Error saving users:', error);
-  }
-};
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 /**
  * Middleware de autenticación JWT
  * Verifica el token en el header Authorization
+ *
+ * CAMBIOS: Ahora verifica contra la base de datos en lugar de archivo JSON
  */
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ 
+    return res.status(401).json({
       success: false,
-      error: 'Token de acceso requerido' 
+      error: "Token de acceso requerido",
     });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'boost-agency-secret-key', (err, user) => {
-    if (err) {
-      return res.status(403).json({ 
+  try {
+    // Verificar el token JWT
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "boost-agency-secret-key"
+    );
+
+    // NUEVO: Verificar que el usuario aún existe y está activo en la BD
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(403).json({
         success: false,
-        error: 'Token inválido o expirado' 
+        error: "Usuario no encontrado",
       });
     }
-    req.user = user;
+
+    if (user.status !== "active") {
+      return res.status(403).json({
+        success: false,
+        error: "Usuario inactivo o suspendido",
+      });
+    }
+
+    // Agregar información del usuario al request
+    req.user = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      full_name: user.full_name,
+    };
+
     next();
-  });
+  } catch (error) {
+    console.error("Error en autenticación:", error);
+    return res.status(403).json({
+      success: false,
+      error: "Token inválido o expirado",
+    });
+  }
 };
 
 /**
  * Middleware de verificación de roles
  * Verifica que el usuario tenga uno de los roles permitidos
+ *
+ * SIN CAMBIOS: Funciona igual, pero ahora req.user viene de PostgreSQL
  */
 const requireRole = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        error: 'Usuario no autenticado' 
+        error: "Usuario no autenticado",
       });
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: 'Permisos insuficientes' 
+        error: "Permisos insuficientes",
+        required_roles: roles,
+        user_role: req.user.role,
       });
     }
     next();
@@ -94,27 +104,58 @@ const requireRole = (roles) => {
 /**
  * Middleware opcional de autenticación
  * No falla si no hay token, pero agrega user si existe
+ *
+ * CAMBIOS: Ahora también verifica contra base de datos
  */
-const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return next();
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'boost-agency-secret-key', (err, user) => {
-    if (!err) {
-      req.user = user;
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "boost-agency-secret-key"
+    );
+
+    // NUEVO: Verificar contra base de datos
+    const user = await User.findById(decoded.id);
+
+    if (user && user.status === "active") {
+      req.user = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        full_name: user.full_name,
+      };
     }
-    next();
-  });
+  } catch (error) {
+    // Si hay error, simplemente continuar sin usuario
+    console.log("Token inválido en optionalAuth, continuando sin usuario");
+  }
+
+  next();
 };
+
+/**
+ * NUEVO: Middleware para verificar si el usuario es admin
+ * Shorthand para requireRole(['admin'])
+ */
+const requireAdmin = requireRole(["admin"]);
+
+/**
+ * NUEVO: Middleware para verificar si el usuario es admin o editor
+ * Shorthand para requireRole(['admin', 'editor'])
+ */
+const requireEditor = requireRole(["admin", "editor"]);
 
 module.exports = {
   authenticateToken,
   requireRole,
   optionalAuth,
-  loadUsers,
-  saveUsers
+  requireAdmin,
+  requireEditor,
 };
